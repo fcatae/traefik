@@ -43,7 +43,10 @@ type LogHandler struct {
 // NewLogHandler creates a new LogHandler
 func NewLogHandler(config *types.AccessLog) (*LogHandler, error) {
 	file := os.Stdout
-	if len(config.FilePath) > 0 {
+
+	clientName, clientKey, parseOk := parseAppInsightMoniker(config.FilePath)
+
+	if len(config.FilePath) > 0 && (!parseOk) {
 		f, err := openAccessLogFile(config.FilePath)
 		if err != nil {
 			return nil, fmt.Errorf("error opening access log file: %s", err)
@@ -81,6 +84,10 @@ func NewLogHandler(config *types.AccessLog) (*LogHandler, error) {
 		} else {
 			logHandler.httpCodeRanges = httpCodeRanges
 		}
+	}
+
+	if parseOk {
+		createAppInsightHook(logger, clientName, clientKey)
 	}
 
 	return logHandler, nil
@@ -251,7 +258,7 @@ func (l *LogHandler) logTheRoundTrip(logDataTable *LogData, crr *captureRequestR
 
 		l.mu.Lock()
 		defer l.mu.Unlock()
-		l.logger.WithFields(fields).Println()
+		l.logger.WithFields(fields).Println("accessLog", core[RequestPath])
 	}
 }
 
