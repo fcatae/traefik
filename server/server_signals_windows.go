@@ -4,7 +4,10 @@ package server
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"os"
+=======
+>>>>>>> abd74fc83ade0eed563ca2f67db07cc66865f235
 	"syscall"
 	"unsafe"
 
@@ -17,6 +20,7 @@ var (
 	procSetEvent    = kernel32.NewProc("SetEvent")
 )
 
+<<<<<<< HEAD
 var logFileRotationNumber = 1
 
 const windowsEventNamePrefix = "traefik-GUID"
@@ -32,14 +36,25 @@ func (s *Server) configureSignals() {
 	windowsEventNameWithPid := getWindowsEventName()
 
 	handle, err := createEvent(windowsEventNameWithPid)
+=======
+const windowsEventName = "SomeMutexNameGUID"
+
+var windowsEventHandle uintptr
+
+func (s *Server) configureSignals() {
+	handle, err := createEvent(windowsEventName)
+>>>>>>> abd74fc83ade0eed563ca2f67db07cc66865f235
 
 	if err != nil {
 		panic("server already running?")
 	}
 
 	windowsEventHandle = handle
+<<<<<<< HEAD
 
 	log.Info("Watching Windows Object {", windowsEventNameWithPid, "}")
+=======
+>>>>>>> abd74fc83ade0eed563ca2f67db07cc66865f235
 }
 
 func (s *Server) listenSignals() {
@@ -83,6 +98,7 @@ func signalFileRotation(s *Server) {
 	log.Infof("Closing and re-opening log files for rotation")
 	fmt.Println("Closing and re-opening log files for rotation")
 
+<<<<<<< HEAD
 	// accessLoggerMiddleware.Rotate does not work in Windows
 
 	// if s.accessLoggerMiddleware != nil {
@@ -96,4 +112,15 @@ func signalFileRotation(s *Server) {
 	}
 
 	logFileRotationNumber++
+=======
+	if s.accessLoggerMiddleware != nil {
+		if err := s.accessLoggerMiddleware.Rotate(); err != nil {
+			log.Errorf("Error rotating access log: %s", err)
+		}
+	}
+
+	if err := log.RotateFile(); err != nil {
+		log.Errorf("Error rotating traefik log: %s", err)
+	}
+>>>>>>> abd74fc83ade0eed563ca2f67db07cc66865f235
 }
